@@ -1,0 +1,114 @@
+networks:
+  backend:
+    internal: true
+  egress:
+    internal: false
+
+services:
+  minecraft-fabric:
+    image: itzg/minecraft-server:${MC_IMAGE_VERSION:-latest}
+    container_name: minecraft-fabric
+    restart: unless-stopped
+    networks:
+      - backend
+      - egress
+    stdin_open: true
+    tty: true
+    user: "99:100"
+    ports:
+      - "${MC_PORT:-25565}:25565"
+    volumes:
+      - ${MINECRAFT_DATA_PATH}:/data:rw
+    environment:
+      - EULA=TRUE
+      - TYPE=FABRIC
+      - VERSION=${MC_VERSION}
+      - FABRIC_LOADER_VERSION=${FABRIC_LOADER_VERSION}
+      - TZ=${TZ:-America/Los_Angeles}
+      - MEMORY=${MC_MEMORY:-4G}
+      - USE_AIKAR_FLAGS=true
+      - SERVER_NAME=${SERVER_NAME:-Minecraft Fabric Server}
+      - MOTD=${MOTD:-A Minecraft Fabric Server}
+      - DIFFICULTY=${DIFFICULTY:-easy}
+      - MODE=${GAMEMODE:-survival}
+      - PVP=${PVP:-false}
+      - MAX_PLAYERS=${MAX_PLAYERS:-20}
+      - VIEW_DISTANCE=${VIEW_DISTANCE:-12}
+      - SIMULATION_DISTANCE=${SIMULATION_DISTANCE:-10}
+      - SPAWN_PROTECTION=${SPAWN_PROTECTION:-0}
+      - ALLOW_FLIGHT=${ALLOW_FLIGHT:-false}
+      - ENABLE_COMMAND_BLOCK=${ENABLE_COMMAND_BLOCK:-false}
+      - LEVEL_TYPE=${LEVEL_TYPE:-minecraft:normal}
+      - LEVEL=${LEVEL_NAME:-world}
+      - ONLINE_MODE=${ONLINE_MODE:-true}
+      - MAX_TICK_TIME=-1
+      - ENABLE_WHITELIST=${ENABLE_WHITELIST:-false}
+      - WHITELIST=${WHITELIST:-}
+      - OPS=${OPS:-}
+      - ENABLE_RCON=${ENABLE_RCON:-true}
+      - RCON_PORT=25575
+      - RCON_PASSWORD=${RCON_PASSWORD}
+      - SYNC_CHUNK_WRITES=false
+      - USE_NATIVE_TRANSPORT=true
+      - NETWORK_COMPRESSION_THRESHOLD=256
+      - ENABLE_AUTOPAUSE=${ENABLE_AUTOPAUSE:-true}
+      - AUTOPAUSE_TIMEOUT_EST=${AUTOPAUSE_TIMEOUT_EST:-3600}
+      - AUTOPAUSE_TIMEOUT_INIT=${AUTOPAUSE_TIMEOUT_INIT:-600}
+      - PACKWIZ_URL=${PACKWIZ_URL}
+    labels:
+      net.unraid.docker.webui: "http://[IP]:[PORT:25565]"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/minecraft.png"
+
+  mc-backup-hourly:
+    image: itzg/mc-backup:${MC_BACKUP_IMAGE_TAG:-latest}
+    container_name: minecraft-backup-hourly
+    restart: unless-stopped
+    networks:
+      - backend
+    user: "99:100"
+    depends_on:
+      - minecraft-fabric
+    volumes:
+      - ${MINECRAFT_DATA_PATH}:/data:ro
+      - ${MINECRAFT_BACKUP_HOURLY_PATH}:/backups:rw
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      - BACKUP_INTERVAL=1h
+      - SRC_DIR=/data
+      - BACKUP_NAME=world-hourly
+      - PRUNE_BACKUPS_DAYS=3
+      - PRUNE_BACKUPS_COUNT=24
+      - TAR_COMPRESS_METHOD=gzip
+      - RCON_HOST=minecraft-fabric
+      - RCON_PORT=25575
+      - RCON_PASSWORD=${RCON_PASSWORD}
+      - PAUSE_IF_NO_PLAYERS=true
+    labels:
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/duplicati.png"
+
+  mc-backup-daily:
+    image: itzg/mc-backup:${MC_BACKUP_IMAGE_TAG:-latest}
+    container_name: minecraft-backup-daily
+    restart: unless-stopped
+    networks:
+      - backend
+    user: "99:100"
+    depends_on:
+      - minecraft-fabric
+    volumes:
+      - ${MINECRAFT_DATA_PATH}:/data:ro
+      - ${MINECRAFT_BACKUP_DAILY_PATH}:/backups:rw
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      - BACKUP_CRON=0 4 * * *
+      - SRC_DIR=/data
+      - BACKUP_NAME=world-daily
+      - PRUNE_BACKUPS_DAYS=30
+      - PRUNE_BACKUPS_COUNT=7
+      - TAR_COMPRESS_METHOD=gzip
+      - RCON_HOST=minecraft-fabric
+      - RCON_PORT=25575
+      - RCON_PASSWORD=${RCON_PASSWORD}
+      - PAUSE_IF_NO_PLAYERS=false
+    labels:
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/duplicati.png"
