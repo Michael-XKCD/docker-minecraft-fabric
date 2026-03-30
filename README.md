@@ -1,26 +1,15 @@
-# homelab-docker-minecraft-fabric
+# docker-minecraft-fabric
 
-Reusable Docker Compose stack repo for the Minecraft Fabric server and its backup sidecars.
+Docker Compose stack for a Minecraft Fabric server with built-in hourly and daily backups.
 
-## Purpose
+## Includes
 
-This repository contains the reusable runtime compose stack for the Minecraft Fabric
-server, including hourly and daily backup containers. The homelab monorepo should
-consume tagged releases from this repo and apply environment-specific networking,
-Pangolin labels, and secrets.
+- Fabric server runtime
+- hourly backup sidecar
+- daily backup sidecar
+- Packwiz modpack source under `packwiz/`
 
-The Packwiz content used by the server lives in this repo under `packwiz/` so the
-stack source remains self-contained.
+## Notes
 
-## Included
-
-- `compose.yaml`
-- `.env.example`
-- validation workflow
-- basic consumption notes
-
-## Not Included
-
-- real secrets
-- host-specific Pangolin labels
-- host-specific backup/data paths
+- this repo is intentionally public so the Packwiz manifest can be fetched directly
+- secrets and host-specific paths should live in downstream env/secrets, not here

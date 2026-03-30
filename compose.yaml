@@ -42,10 +42,10 @@ services:
       - LEVEL=${LEVEL_NAME:-world}
       - ONLINE_MODE=${ONLINE_MODE:-true}
       - MAX_TICK_TIME=-1
-      - ENABLE_WHITELIST=${ENABLE_WHITELIST:-false}
-      - WHITELIST=${WHITELIST:-}
+      - ENABLE_WHITELIST=${ENABLE_WHITELIST}
+      - WHITELIST=${WHITELIST}
       - OPS=${OPS:-}
-      - ENABLE_RCON=${ENABLE_RCON:-true}
+      - ENABLE_RCON=${ENABLE_RCON}
       - RCON_PORT=25575
       - RCON_PASSWORD=${RCON_PASSWORD}
       - SYNC_CHUNK_WRITES=false
