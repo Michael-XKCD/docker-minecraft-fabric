@@ -9,6 +9,9 @@ server, including hourly and daily backup containers. The homelab monorepo shoul
 consume tagged releases from this repo and apply environment-specific networking,
 Pangolin labels, and secrets.
 
+The Packwiz content used by the server lives in this repo under `packwiz/` so the
+stack source remains self-contained.
+
 ## Included
 
 - `compose.yaml`
